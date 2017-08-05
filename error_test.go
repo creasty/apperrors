@@ -82,7 +82,7 @@ func TestWithStatusCode(t *testing.T) {
 
 		appErr := Unwrap(err1)
 		assert.Equal(t, err0, appErr.Err)
-		assert.Equal(t, err0.Error(), appErr.Message)
+		assert.Equal(t, "", appErr.Message)
 	})
 
 	t.Run("already wrapped", func(t *testing.T) {
@@ -124,7 +124,7 @@ func TestWithReport(t *testing.T) {
 
 		appErr := Unwrap(err1)
 		assert.Equal(t, err0, appErr.Err)
-		assert.Equal(t, err0.Error(), appErr.Message)
+		assert.Equal(t, "", appErr.Message)
 	})
 
 	t.Run("already wrapped", func(t *testing.T) {
@@ -156,7 +156,7 @@ func TestWrap(t *testing.T) {
 
 		appErr := Unwrap(err1)
 		assert.Equal(t, err0, appErr.Err)
-		assert.Equal(t, err0.Error(), appErr.Message)
+		assert.Equal(t, "", appErr.Message)
 		assert.NotEmpty(t, appErr.StackTrace)
 		assert.Equal(t, "wrapOrigin", appErr.StackTrace[0].Func)
 	})
@@ -170,7 +170,7 @@ func TestWrap(t *testing.T) {
 
 		appErr := Unwrap(err2)
 		assert.Equal(t, err0, appErr.Err)
-		assert.Equal(t, err0.Error(), appErr.Message)
+		assert.Equal(t, "", appErr.Message)
 		assert.NotEmpty(t, appErr.StackTrace)
 		assert.Equal(t, "wrapOrigin", appErr.StackTrace[0].Func)
 	})
@@ -184,7 +184,7 @@ func TestWrap(t *testing.T) {
 
 			appErr := Unwrap(err1)
 			assert.Equal(t, err0, appErr.Err)
-			assert.Equal(t, "original", appErr.Message)
+			assert.Equal(t, "", appErr.Message)
 			assert.NotEmpty(t, appErr.StackTrace)
 			assert.Equal(t, "pkgErrorsNew", appErr.StackTrace[0].Func)
 		})
@@ -206,7 +206,5 @@ func TestWrap(t *testing.T) {
 }
 
 func wrapOrigin(err error) error {
-	return func() error {
-		return wrap(err)
-	}()
+	return Wrap(err)
 }

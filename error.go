@@ -68,14 +68,20 @@ func wrap(err error) *Error {
 		return appErr
 	}
 
-	if pkgErr.StackTrace == nil {
-		pkgErr.StackTrace = newStackTrace(1)
+	stackTrace := pkgErr.StackTrace
+	if stackTrace == nil {
+		stackTrace = newStackTrace(1)
+	}
+
+	var msg string
+	if pkgErr.Message != pkgErr.Err.Error() {
+		msg = pkgErr.Message
 	}
 
 	return &Error{
 		Err:        pkgErr.Err,
-		StackTrace: pkgErr.StackTrace,
-		Message:    pkgErr.Message,
+		StackTrace: stackTrace,
+		Message:    msg,
 	}
 }
 
