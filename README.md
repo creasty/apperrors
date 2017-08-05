@@ -1,6 +1,8 @@
 apperrors
 =========
 
+[![Build Status](https://travis-ci.org/creasty/apperrors.svg?branch=master)](https://travis-ci.org/creasty/apperrors)
+
 Better error handling solution especially for application server.
 
 `apperrors` provides contextual metadata to errors.
