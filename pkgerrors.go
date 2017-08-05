@@ -13,11 +13,7 @@ type pkgError struct {
 	StackTrace StackTrace
 }
 
-func extractPkgError(err error) *pkgError {
-	if err == nil {
-		return nil
-	}
-
+func extractPkgError(err error) pkgError {
 	type stackTracer interface {
 		StackTrace() pkgerrors.StackTrace
 	}
@@ -56,7 +52,7 @@ func extractPkgError(err error) *pkgError {
 		}
 	}
 
-	return &pkgError{
+	return pkgError{
 		Err:        errLatch,
 		Message:    err.Error(),
 		StackTrace: frames,

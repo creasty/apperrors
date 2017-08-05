@@ -51,6 +51,43 @@ func (e *Error) Copy() *Error {
 	}
 }
 
+// Wrap returns an error annotated with a stack trace.
+// If err is nil, Wrap returns nil.
+func Wrap(err error) error {
+	if err == nil {
+		return nil
+	}
+
+	return wrap(err)
+}
+
+func wrap(err error) *Error {
+	pkgErr := extractPkgError(err)
+
+	if appErr, ok := pkgErr.Err.(*Error); ok {
+		return appErr
+	}
+
+	if pkgErr.StackTrace == nil {
+		pkgErr.StackTrace = newStackTrace(1)
+	}
+
+	return &Error{
+		Err:        pkgErr.Err,
+		StackTrace: pkgErr.StackTrace,
+		Message:    pkgErr.Message,
+	}
+}
+
+// Unwrap extracts underlying apperrors.Error from an error
+func Unwrap(err error) *Error {
+	if appErr, ok := err.(*Error); ok {
+		return appErr
+	}
+
+	return nil
+}
+
 // WithMessage wraps err if necessary, and sets a message to its context
 func WithMessage(err error, msg string) error {
 	if err == nil {
@@ -82,24 +119,4 @@ func WithReport(err error) error {
 	appErr := wrap(err).Copy()
 	appErr.Report = true
 	return appErr
-}
-
-func wrap(err error) *Error {
-	if appErr, ok := err.(*Error); ok {
-		return appErr
-	}
-
-	return &Error{
-		Err:        err,
-		StackTrace: newStackTrace(1),
-	}
-}
-
-// Unwrap extracts underlying apperrors.Error from an error
-func Unwrap(err error) *Error {
-	if appErr, ok := err.(*Error); ok {
-		return appErr
-	}
-
-	return nil
 }
