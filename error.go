@@ -7,10 +7,16 @@ import (
 
 // Error is an error that has contextual metadata
 type Error struct {
-	Err        error
-	Message    string
+	// Err is the original error (you might call it the root cause)
+	Err error
+	// Message is an annotated description of the error
+	Message string
+	// StatusCode is a status code that is desired to be used for a HTTP response
 	StatusCode int
-	Report     bool
+	// Report represents whether the error should be reported to administrators
+	Report bool
+	// StackTrace is a stack trace of the original error
+	// from the point where it was created
 	StackTrace StackTrace
 }
 
