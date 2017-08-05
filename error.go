@@ -52,7 +52,7 @@ func (e *Error) Copy() *Error {
 }
 
 // Wrap returns an error annotated with a stack trace.
-// If err is nil, Wrap returns nil.
+// Returns nil if err is nil
 func Wrap(err error) error {
 	if err == nil {
 		return nil
@@ -85,7 +85,8 @@ func wrap(err error) *Error {
 	}
 }
 
-// Unwrap extracts underlying apperrors.Error from an error
+// Unwrap extracts an underlying *apperrors.Error from an error.
+// Returns nil if it failed to extract
 func Unwrap(err error) *Error {
 	if appErr, ok := err.(*Error); ok {
 		return appErr
@@ -94,7 +95,7 @@ func Unwrap(err error) *Error {
 	return nil
 }
 
-// WithMessage wraps err if necessary, and sets a message to its context
+// WithMessage wraps err and annotates with a message
 func WithMessage(err error, msg string) error {
 	if err == nil {
 		return nil
@@ -105,7 +106,7 @@ func WithMessage(err error, msg string) error {
 	return appErr
 }
 
-// WithStatusCode wraps err if necessary, and sets a status code to its context
+// WithStatusCode wraps err and annotates with a status code
 func WithStatusCode(err error, code int) error {
 	if err == nil {
 		return nil
@@ -116,7 +117,7 @@ func WithStatusCode(err error, code int) error {
 	return appErr
 }
 
-// WithReport wraps err if necessary, and marks as a reportable
+// WithReport wraps err and annotates with a reportabilty
 func WithReport(err error) error {
 	if err == nil {
 		return nil
