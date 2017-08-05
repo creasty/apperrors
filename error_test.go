@@ -15,6 +15,8 @@ func TestNew(t *testing.T) {
 	appErr := Unwrap(err)
 	assert.Equal(t, err.Error(), appErr.Err.Error())
 	assert.Equal(t, "", appErr.Message)
+	assert.NotEmpty(t, appErr.StackTrace)
+	assert.Equal(t, "TestNew", appErr.StackTrace[0].Func)
 }
 
 func TestErrorf(t *testing.T) {
@@ -24,6 +26,8 @@ func TestErrorf(t *testing.T) {
 	appErr := Unwrap(err)
 	assert.Equal(t, err.Error(), appErr.Err.Error())
 	assert.Equal(t, "", appErr.Message)
+	assert.NotEmpty(t, appErr.StackTrace)
+	assert.Equal(t, "TestErrorf", appErr.StackTrace[0].Func)
 }
 
 func TestWithMessage(t *testing.T) {
