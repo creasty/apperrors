@@ -15,7 +15,7 @@ func TestExtractPkgError(t *testing.T) {
 
 		pkgErr := extractPkgError(err)
 		assert.NotNil(t, pkgErr)
-		assert.Equal(t, "message", pkgErr.Message)
+		assert.Equal(t, "", pkgErr.Message)
 		assert.Equal(t, err, pkgErr.Err)
 		assert.NotEmpty(t, pkgErr.StackTrace)
 		assert.Equal(t, "pkgErrorsNew", pkgErr.StackTrace[0].Func)

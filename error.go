@@ -75,15 +75,10 @@ func wrap(err error) *Error {
 		stackTrace = newStackTrace(1)
 	}
 
-	var msg string
-	if pkgErr.Message != pkgErr.Err.Error() {
-		msg = pkgErr.Message
-	}
-
 	return &Error{
 		Err:        pkgErr.Err,
 		StackTrace: stackTrace,
-		Message:    msg,
+		Message:    pkgErr.Message,
 	}
 }
 

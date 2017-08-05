@@ -14,27 +14,26 @@ type pkgError struct {
 }
 
 func extractPkgError(err error) pkgError {
-	type stackTracer interface {
+	type traceable interface {
 		StackTrace() pkgerrors.StackTrace
 	}
-
 	type causer interface {
 		Cause() error
 	}
 
-	var st pkgerrors.StackTrace
 	rootErr := err
-
+	var st pkgerrors.StackTrace
 	for {
-		if stackTrace, ok := rootErr.(stackTracer); ok {
+		if stackTrace, ok := rootErr.(traceable); ok {
 			st = stackTrace.StackTrace()
 		}
 
 		if cause, ok := rootErr.(causer); ok {
 			rootErr = cause.Cause()
-		} else {
-			break
+			continue
 		}
+
+		break
 	}
 
 	var frames []Frame
@@ -52,9 +51,14 @@ func extractPkgError(err error) pkgError {
 		}
 	}
 
+	var msg string
+	if err.Error() != rootErr.Error() {
+		msg = err.Error()
+	}
+
 	return pkgError{
 		Err:        rootErr,
-		Message:    err.Error(),
+		Message:    msg,
 		StackTrace: frames,
 	}
 }
