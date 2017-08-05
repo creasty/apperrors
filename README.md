@@ -2,6 +2,9 @@ apperrors
 =========
 
 [![Build Status](https://travis-ci.org/creasty/apperrors.svg?branch=master)](https://travis-ci.org/creasty/apperrors)
+[![codecov](https://codecov.io/gh/creasty/apperrors/branch/master/graph/badge.svg)](https://codecov.io/gh/creasty/apperrors)
+[![GoDoc](https://godoc.org/github.com/creasty/apperrors?status.svg)](https://godoc.org/github.com/creasty/apperrors)
+[![License](https://img.shields.io/github/license/creasty/apperrors.svg)](./LICENSE)
 
 Better error handling solution especially for application server.
 
@@ -21,7 +24,7 @@ And because of that, it's pretty hard to debug.
 
 ### How different from [pkg/errors](https://github.com/pkg/errors)
 
-:memo: `creasty/apperrors` supports `pkg/errors`. It reuses `pkg/errors`'s stack trace data of the innermost (root) error, and converts into `apperrors`'s data type.
+:memo: `apperrors` supports `pkg/errors`. It reuses `pkg/errors`'s stack trace data of the innermost (root) error, and converts into `apperrors`'s data type.
 
 TBA
 
