@@ -183,6 +183,72 @@ $ go run main.go
 }
 ```
 
-### Example: Error reporting in web server
+### Example: Server-side error reporting with [gin-gonic/gin](https://github.com/gin-gonic/gin)
 
-TBA
+Prepare a simple middleware and modify to satisfy your needs:
+
+```go
+package middleware
+
+const contextError = "AppError"
+
+func SetError(c *gin.Context, err error) {
+	c.Set(contextError, err)
+}
+
+func GetError(c *gin.Context) error {
+	if v, exists := c.Get(contextError); exists {
+		if err, ok := v.(error); ok {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func ReportError() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Next()
+
+		err := GetError(c)
+		if err == nil {
+			return
+		}
+
+		if appErr := apperrors.Unwrap(err); appErr != nil {
+			if appErr.Report {
+				// Send to an external service
+			}
+
+			if appErr.Message != "" {
+				// Expose a message in the header
+				c.Header("X-App-Error", appErr.Message)
+			}
+
+			if appErr.StatusCode != 0 {
+				// Set status code accordingly
+				c.Status(appErr.StatusCode)
+			}
+		}
+	}
+}
+```
+
+And then you can use like as follows.
+
+```go
+r := gin.Default()
+r.Use(middleware.ReportError()) // Use the middleware handler
+
+r.GET("/test", func(c *gin.Context) {
+	err := doSomethingReallyComplex()
+	if err != nil {
+		middleware.SetError(c, err) // Neither `c.AbortWithError` nor `c.Error`
+		return
+	}
+
+	c.AbortWithStatus(200)
+})
+
+r.Run()
+```
