@@ -152,6 +152,13 @@ func TestWithReport(t *testing.T) {
 	})
 }
 
+func TestUnwrap(t *testing.T) {
+	t.Run("nil", func(t *testing.T) {
+		appErr := Unwrap(nil)
+		assert.Nil(t, appErr)
+	})
+}
+
 func TestWrap(t *testing.T) {
 	t.Run("bare", func(t *testing.T) {
 		err0 := errors.New("original")
