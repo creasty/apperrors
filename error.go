@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-// Error is an error that has an application context
+// Error is an error that has contextual metadata
 type Error struct {
 	Err        error
 	Message    string
@@ -14,16 +14,18 @@ type Error struct {
 	StackTrace StackTrace
 }
 
-// New returns an error with the supplied message
-func New(str string) error {
+// New returns an error that formats as the given text.
+// It also annotates the error with a stack trace from the point it was called
+func New(text string) error {
 	return &Error{
-		Err:        errors.New(str),
+		Err:        errors.New(text),
 		StackTrace: newStackTrace(0),
 	}
 }
 
 // Errorf formats according to a format specifier and returns the string
-// as a value that satisfies error
+// as a value that satisfies error.
+// It also annotates the error with a stack trace from the point it was called
 func Errorf(format string, args ...interface{}) error {
 	return &Error{
 		Err:        fmt.Errorf(format, args...),
@@ -51,8 +53,8 @@ func (e *Error) Copy() *Error {
 	}
 }
 
-// Wrap returns an error annotated with a stack trace.
-// Returns nil if err is nil
+// Wrap returns an error annotated with a stack trace from the point it was called.
+// It returns nil if err is nil
 func Wrap(err error) error {
 	if err == nil {
 		return nil
@@ -86,7 +88,8 @@ func wrap(err error) *Error {
 }
 
 // Unwrap extracts an underlying *apperrors.Error from an error.
-// Returns nil if it failed to extract
+// If the given error isn't eligible for retriving context from,
+// it returns nil
 func Unwrap(err error) *Error {
 	if appErr, ok := err.(*Error); ok {
 		return appErr
@@ -95,7 +98,8 @@ func Unwrap(err error) *Error {
 	return nil
 }
 
-// WithMessage wraps err and annotates with a message
+// WithMessage wraps the error and annotates with the message.
+// If err is nil, it returns nil
 func WithMessage(err error, msg string) error {
 	if err == nil {
 		return nil
@@ -106,7 +110,8 @@ func WithMessage(err error, msg string) error {
 	return appErr
 }
 
-// WithStatusCode wraps err and annotates with a status code
+// WithStatusCode wraps the error and annotates with the status code.
+// If err is nil, it returns nil
 func WithStatusCode(err error, code int) error {
 	if err == nil {
 		return nil
@@ -117,7 +122,8 @@ func WithStatusCode(err error, code int) error {
 	return appErr
 }
 
-// WithReport wraps err and annotates with a reportabilty
+// WithReport wraps the error and annotates with the reportability.
+// If err is nil, it returns nil
 func WithReport(err error) error {
 	if err == nil {
 		return nil
