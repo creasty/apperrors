@@ -13,6 +13,10 @@ type pkgError struct {
 	StackTrace StackTrace
 }
 
+// extractPkgError extracts the innermost error from the given error.
+// It converts the stack trace that is annotated by pkg/errors into apperrors.StackTrace.
+// If the error doesn't have a stack trace or a causer of pkg/errors,
+// it simply returns the original error
 func extractPkgError(err error) pkgError {
 	type traceable interface {
 		StackTrace() pkgerrors.StackTrace
