@@ -27,19 +27,26 @@ Create an error
 ---------------
 
 ```go
-// New returns an error that formats as the given text.
-// It also annotates the error with a stack trace from the point it was called
 func New(str string) error
+```
 
-// Errorf formats according to a format specifier and returns the string
-// as a value that satisfies error.
-// It also annotates the error with a stack trace from the point it was called
+New returns an error that formats as the given text.  
+It also annotates the error with a stack trace from the point it was called
+
+```go
 func Errorf(format string, args ...interface{}) error
+```
 
-// Wrap returns an error annotated with a stack trace from the point it was called.
-// It returns nil if err is nil
+Errorf formats according to a format specifier and returns the string
+as a value that satisfies error.  
+It also annotates the error with a stack trace from the point it was called
+
+```go
 func Wrap(err error) error
 ```
+
+Wrap returns an error annotated with a stack trace from the point it was called.  
+It returns nil if err is nil
 
 ### Example: Creating a new error
 
@@ -64,25 +71,37 @@ Annotate an error
 -----------------
 
 ```go
-// WithMessage wraps the error and annotates with the message.
-// If err is nil, it returns nil
 func WithMessage(err error, msg string) error
+```
 
-// WithStatusCode wraps the error and annotates with the status code.
-// If err is nil, it returns nil
+WithMessage wraps the error and annotates with the message.  
+If err is nil, it returns nil
+
+```go
 func WithStatusCode(err error, code int) error
+```
 
-// WithReport wraps the error and annotates with the reportability.
-// If err is nil, it returns nil
+WithStatusCode wraps the error and annotates with the status code.  
+If err is nil, it returns nil
+
+```go
 func WithReport(err error) error
 ```
 
-### Example: Adding all context
+WithReport wraps the error and annotates with the reportability.  
+If err is nil, it returns nil
+
+### Example: Adding all contexts
 
 ```go
 _, err := ioutil.ReadAll(r)
 if err != nil {
-	return apperrors.WithReport(apperrors.WithStatusCode(apperrors.WithMessage(err, "read failed"), http.StatusBadRequest))
+	return apperrors.WithReport(
+		apperrors.WithStatusCode(
+			apperrors.WithMessage(err, "read failed"),
+			http.StatusBadRequest
+		)
+	)
 }
 ```
 
@@ -91,7 +110,14 @@ Extract context from an error
 -----------------------------
 
 ```go
-// Error is an error that has contextual metadata
+func Unwrap(err error) *Error
+```
+
+Unwrap extracts an underlying \*apperrors.Error from an error.  
+If the given error isn't eligible for retriving context from,
+it returns nil
+
+```go
 type Error struct {
 	// Err is the original error (you might call it the root cause)
 	Err error
@@ -105,11 +131,6 @@ type Error struct {
 	// from the point where it was created
 	StackTrace StackTrace
 }
-
-// Unwrap extracts an underlying *apperrors.Error from an error.
-// If the given error isn't eligible for retriving context from,
-// it returns nil
-func Unwrap(err error) *Error
 ```
 
 ### Example
@@ -126,7 +147,7 @@ import (
 )
 
 func errFunc0() error {
-	return errors.New("e0")
+	return errors.New("this is the root cause")
 }
 func errFunc1() error {
 	return apperrors.Wrap(errFunc0())
@@ -147,7 +168,7 @@ func main() {
 ```sh-session
 $ go run main.go
 &apperrors.Error{
-  Err:        &errors.errorString{s: "e0"},
+  Err:        &errors.errorString{s: "this is the root cause"},
   Message:    "fucked up!",
   StatusCode: 500,
   Report:     true,
