@@ -160,6 +160,11 @@ func TestUnwrap(t *testing.T) {
 }
 
 func TestWrap(t *testing.T) {
+	t.Run("nil", func(t *testing.T) {
+		appErr := Wrap(nil)
+		assert.Nil(t, appErr)
+	})
+
 	t.Run("bare", func(t *testing.T) {
 		err0 := errors.New("original")
 

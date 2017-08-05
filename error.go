@@ -92,10 +92,6 @@ func wrap(err error) *Error {
 // If the given error isn't eligible for retriving context from,
 // it returns nil
 func Unwrap(err error) *Error {
-	if err == nil {
-		return nil
-	}
-
 	if appErr, ok := err.(*Error); ok {
 		return appErr
 	}
