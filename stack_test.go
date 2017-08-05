@@ -33,3 +33,26 @@ func TestNewStackTrace(t *testing.T) {
 		assert.NotZero(t, st1[0].Line)
 	})
 }
+
+func TestFuncname(t *testing.T) {
+	tests := map[string]string{
+		"":                                      "",
+		"runtime.main":                          "main",
+		"github.com/creasty/apperrors.funcname": "funcname",
+		"funcname":                              "funcname",
+		"io.copyBuffer":                         "copyBuffer",
+		"main.(*R).Write":                       "(*R).Write",
+	}
+
+	for input, expect := range tests {
+		assert.Equal(t, expect, funcname(input))
+	}
+}
+
+func TestTrimGOPATH(t *testing.T) {
+	gopath := "/home/user"
+	file := gopath + "/src/pkg/sub/file.go"
+	funcName := "pkg/sub.Type.Method"
+
+	assert.Equal(t, "pkg/sub/file.go", trimGOPATH(funcName, file))
+}
