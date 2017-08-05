@@ -1,0 +1,35 @@
+package apperrors
+
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
+
+func TestNewStackTrace(t *testing.T) {
+	var st0 StackTrace
+	func() {
+		st0 = newStackTrace(0)
+	}()
+
+	var st1 StackTrace
+	func() {
+		func() {
+			st1 = newStackTrace(1)
+		}()
+	}()
+
+	t.Run("offset 0", func(t *testing.T) {
+		assert.NotEmpty(t, st0)
+		assert.Equal(t, "TestNewStackTrace", st0[0].Func)
+		assert.Equal(t, "github.com/creasty/apperrors/stack_test.go", st0[0].File)
+		assert.NotZero(t, st0[0].Line)
+	})
+
+	t.Run("offset n", func(t *testing.T) {
+		assert.NotEmpty(t, st1)
+		assert.Equal(t, "TestNewStackTrace", st1[0].Func)
+		assert.Equal(t, "github.com/creasty/apperrors/stack_test.go", st1[0].File)
+		assert.NotZero(t, st1[0].Line)
+	})
+}
