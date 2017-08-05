@@ -197,6 +197,23 @@ Prepare a simple middleware and modify to satisfy your needs:
 ```go
 package middleware
 
+func SetError(c *gin.Context, err error) { }
+func GetError(c *gin.Context) error { }
+func ReportError() gin.HandlerFunc { }
+```
+
+<details>
+
+<summary>Show implementation</summary>
+
+```go
+package middleware
+
+import (
+	"github.com/gin-gonic/gin"
+	"github.com/creasty/apperrors"
+)
+
 const contextError = "AppError"
 
 func SetError(c *gin.Context, err error) {
@@ -240,6 +257,8 @@ func ReportError() gin.HandlerFunc {
 	}
 }
 ```
+
+</details><br>
 
 And then you can use like as follows.
 
