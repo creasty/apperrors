@@ -23,15 +23,15 @@ func extractPkgError(err error) pkgError {
 	}
 
 	var st pkgerrors.StackTrace
-	errLatch := err
+	rootErr := err
 
 	for {
-		if stackTrace, ok := errLatch.(stackTracer); ok {
+		if stackTrace, ok := rootErr.(stackTracer); ok {
 			st = stackTrace.StackTrace()
 		}
 
-		if cause, ok := errLatch.(causer); ok {
-			errLatch = cause.Cause()
+		if cause, ok := rootErr.(causer); ok {
+			rootErr = cause.Cause()
 		} else {
 			break
 		}
@@ -53,7 +53,7 @@ func extractPkgError(err error) pkgError {
 	}
 
 	return pkgError{
-		Err:        errLatch,
+		Err:        rootErr,
 		Message:    err.Error(),
 		StackTrace: frames,
 	}
