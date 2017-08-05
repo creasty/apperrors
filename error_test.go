@@ -4,6 +4,7 @@ import (
 	"errors"
 	"testing"
 
+	pkgerrors "github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -205,6 +206,42 @@ func TestWrap(t *testing.T) {
 	})
 }
 
+func TestAll(t *testing.T) {
+	{
+		appErr := Unwrap(errFunc3())
+		assert.Equal(t, "e2: e1: e0", appErr.Message)
+		assert.Equal(t, 0, appErr.StatusCode)
+		assert.Equal(t, false, appErr.Report)
+		assert.NotEmpty(t, appErr.StackTrace)
+		assert.Equal(t, "errFunc1", appErr.StackTrace[0].Func)
+	}
+
+	{
+		appErr := Unwrap(errFunc4())
+		assert.Equal(t, "e4", appErr.Message)
+		assert.Equal(t, 500, appErr.StatusCode)
+		assert.Equal(t, true, appErr.Report)
+		assert.NotEmpty(t, appErr.StackTrace)
+		assert.Equal(t, "errFunc1", appErr.StackTrace[0].Func)
+	}
+}
+
 func wrapOrigin(err error) error {
 	return Wrap(err)
+}
+
+func errFunc0() error {
+	return errors.New("e0")
+}
+func errFunc1() error {
+	return pkgerrors.Wrap(errFunc0(), "e1")
+}
+func errFunc2() error {
+	return pkgerrors.Wrap(errFunc1(), "e2")
+}
+func errFunc3() error {
+	return Wrap(errFunc2())
+}
+func errFunc4() error {
+	return WithReport(WithStatusCode(WithMessage(errFunc3(), "e4"), 500))
 }
