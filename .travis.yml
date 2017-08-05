@@ -18,7 +18,7 @@ before_install:
   - go get -u github.com/golang/lint/golint
 
 install:
-  - go get ./...
+  - go get -t -u ./...
 
 script:
   - make ci-test
