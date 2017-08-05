@@ -19,6 +19,8 @@ And because of that, it's pretty hard to debug.
 
 ### How different from [pkg/errors](https://github.com/pkg/errors)
 
+:memo: `creasty/apperrors` supports `pkg/errors`. It reuses `pkg/errors`'s stack trace data of the innermost (root) error, and converts into `apperrors`'s data type.
+
 TBA
 
 
