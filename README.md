@@ -149,6 +149,7 @@ package main
 
 import (
 	"errors"
+
 	"github.com/creasty/apperrors"
 	"github.com/k0kubun/pp"
 )
@@ -180,10 +181,10 @@ $ go run main.go
   StatusCode: 500,
   Report:     true,
   StackTrace: apperrors.StackTrace{
-    apperrors.Frame{Func: "errFunc1", File: "tmp/main.go", Line: 13},
-    apperrors.Frame{Func: "errFunc2", File: "tmp/main.go", Line: 16},
-    apperrors.Frame{Func: "errFunc3", File: "tmp/main.go", Line: 19},
-    apperrors.Frame{Func: "main", File: "tmp/main.go", Line: 23},
+    apperrors.Frame{Func: "errFunc1", File: "main.go", Line: 13},
+    apperrors.Frame{Func: "errFunc2", File: "main.go", Line: 16},
+    apperrors.Frame{Func: "errFunc3", File: "main.go", Line: 19},
+    apperrors.Frame{Func: "main", File: "main.go", Line: 23},
     apperrors.Frame{Func: "main", File: "runtime/proc.go", Line: 194},
     apperrors.Frame{Func: "goexit", File: "runtime/asm_amd64.s", Line: 2198},
   },
@@ -197,83 +198,85 @@ Prepare a simple middleware and modify to satisfy your needs:
 ```go
 package middleware
 
-func SetError(c *gin.Context, err error) { }
-func GetError(c *gin.Context) error { }
-func ReportError() gin.HandlerFunc { }
-```
-
-<details>
-
-<summary>Show implementation</summary>
-
-```go
-package middleware
-
 import (
-	"github.com/gin-gonic/gin"
+	"net/http"
+
 	"github.com/creasty/apperrors"
+	"github.com/creasty/gin-contrib/readbody"
+	"github.com/gin-gonic/gin"
+
+	// Only for example
+	"github.com/jinzhu/gorm"
+	"github.com/k0kubun/pp"
 )
 
-const contextError = "AppError"
-
-func SetError(c *gin.Context, err error) {
-	c.Set(contextError, err)
-}
-
-func GetError(c *gin.Context) error {
-	if v, exists := c.Get(contextError); exists {
-		if err, ok := v.(error); ok {
-			return err
+// ReportError handles an error, changes status code based on the error,
+// and reports to an external service if necessary
+func ReportError(c *gin.Context, err error) {
+	appErr := apperrors.Unwrap(err)
+	if appErr == nil {
+		// As it's a "raw" error, `StackTrace` field left unset.
+		// And it should be always reported
+		appErr = &apperrors.Error{
+			Err:    err,
+			Report: true,
 		}
 	}
 
-	return nil
+	convertAppError(appErr)
+
+	// Send the error to an external service
+	if appErr.Report {
+		go uploadAppError(c.Copy(), appErr)
+	}
+
+	// Expose an error message in the header
+	if appErr.Message != "" {
+		c.Header("X-App-Error", appErr.Message)
+	}
+
+	// Set status code accordingly
+	if appErr.StatusCode > 0 {
+		c.Status(appErr.StatusCode)
+	} else {
+		c.Status(http.StatusInternalServerError)
+	}
 }
 
-func ReportError() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.Next()
-
-		err := GetError(c)
-		if err == nil {
-			return
-		}
-
-		if appErr := apperrors.Unwrap(err); appErr != nil {
-			if appErr.Report {
-				// Send to an external service
-			}
-
-			if appErr.Message != "" {
-				// Expose a message in the header
-				c.Header("X-App-Error", appErr.Message)
-			}
-
-			if appErr.StatusCode != 0 {
-				// Set status code accordingly
-				c.Status(appErr.StatusCode)
-			}
-		}
+func convertAppError(err *apperrors.Error) {
+	// If the error is from ORM and it says "no record found,"
+	// override status code to 404
+	if err.Err == gorm.ErrRecordNotFound {
+		err.StatusCode = http.StatusNotFound
+		return
 	}
+}
+
+func uploadAppError(c *gin.Context, err *apperrors.Error) {
+	// By using readbody, you can retrive an original request body
+	// even when c.Request.Body had been read
+	body := readbody.Get(c)
+
+	// Just debug
+	pp.Println(string(body[:]))
+	pp.Println(err)
 }
 ```
-
-</details><br>
 
 And then you can use like as follows.
 
 ```go
 r := gin.Default()
-r.Use(middleware.ReportError()) // Use the middleware handler
+r.Use(readbody.Recorder()) // Use github.com/creasty/gin-contrib/readbody
 
 r.GET("/test", func(c *gin.Context) {
 	err := doSomethingReallyComplex()
 	if err != nil {
-		middleware.SetError(c, err) // Neither `c.AbortWithError` nor `c.Error`
+		middleware.ReportError(c, err) // Neither `c.AbortWithError` nor `c.Error`
 		return
 	}
 
-	c.AbortWithStatus(200)
+	c.Status(200)
 })
 
 r.Run()
