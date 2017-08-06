@@ -19,8 +19,8 @@ Better error handling solution especially for application server.
 Why
 ---
 
-Since `error` type in Golang is just an interface of [`Error()`](https://golang.org/ref/spec#Errors) method, it doesn't have contextual information such as stack trace, you cannot be sure where the error occurred in the first place.  
-And because of that, it's pretty hard to debug.
+Since `error` type in Golang is just an interface of [`Error()`](https://golang.org/ref/spec#Errors) method, it doesn't have a stack trace at all. And these errors are likely passed from function to function, you cannot be sure where the error occurred in the first place.  
+Because of this lack of contextual metadata, debugging is a pain in the ass.
 
 ### How different from [pkg/errors](https://github.com/pkg/errors)
 
