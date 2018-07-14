@@ -1,26 +1,23 @@
 package apperrors
 
-// Option attaches contextual metadata to errors.
+// Option annotates an errors.
 type Option func(*Error)
 
-// WithMessage wraps the error and annotates with the message.
-// If err is nil, it returns nil
+// WithMessage annotates with the message.
 func WithMessage(msg string) Option {
 	return func(err *Error) {
 		err.Message = msg
 	}
 }
 
-// WithStatusCode wraps the error and annotates with the status code.
-// If err is nil, it returns nil
+// WithStatusCode annotates with the status code.
 func WithStatusCode(code int) Option {
 	return func(err *Error) {
 		err.StatusCode = code
 	}
 }
 
-// WithReport wraps the error and annotates with the reportability.
-// If err is nil, it returns nil
+// WithReport annotates with the reportability.
 func WithReport() Option {
 	return func(err *Error) {
 		err.Report = true
